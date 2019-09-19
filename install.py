@@ -1,4 +1,6 @@
 #!/usr/bin/python
+"""Installs the jcgb theme for landslide."""
+
 import os, sys, shutil, pkg_resources
 
 THEMENAME = 'jcgb'
@@ -45,3 +47,4 @@ def main(args):
 
 if __name__ == '__main__':
     exit(main(sys.argv[1:]))
+
