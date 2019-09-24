@@ -22,66 +22,78 @@
                            Nicolas Perriault (nperriault@gmail.com)
 -->
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>{{ head_title }}</title>
-    <!-- Styles -->
-    {% if embed %}
-    <style type="text/css" media="print">
-      {{ css.print.contents }}
-    </style>
-    <style type="text/css" media="screen, projection">
-      {{ css.screen.contents }}
-    </style>
-    {% else %}
-    <link rel="stylesheet" media="print" href="{{ css.print.path_url }}">
-    <link rel="stylesheet" media="screen, projection" href="{{ css.screen.path_url }}">
-    {% endif %}
-    {% for css in user_css %}
-      {% if embed %}
-      <style type="text/css" media="screen, projection">
-        {{ css.contents }}
-      </style>
-      {% else %}
-      <link rel="stylesheet" href="{{ css.path_url }}">
-      {% endif %}
-    {% endfor %}
-    <!-- /Styles -->
-    <!-- Javascripts -->
-    {% if embed %}
-    <script>
-      {{ js.contents }}
-    </script>
-    {% else %}
-    <script type="text/javascript" src="{{ js.path_url }}"></script>
-    {% endif %}
-    {% for js in user_js %}
-      {% if embed %}
-      <script>
-        {{ js.contents }}
-      </script>
-      {% else %}
-      <script type="text/javascript" src="{{ js.path_url }}"></script>
-      {% endif %}
-    {% endfor %}
-    {% if math_output %}
-      <script type="text/x-mathjax-config">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <title>{{ head_title }}</title>
+  <!-- Styles -->
+  {% if embed %}
+  <style type="text/css" media="print">
+    {
+        {
+        css.print.contents
+      }
+    }
+  </style>
+  <style type="text/css" media="screen, projection">
+    {
+        {
+        css.screen.contents
+      }
+    }
+  </style>
+  {% else %}
+  <link rel="stylesheet" media="print" href="{{ css.print.path_url }}">
+  <link rel="stylesheet" media="screen, projection" href="{{ css.screen.path_url }}">
+  {% endif %}
+  {% for css in user_css %}
+  {% if embed %}
+  <style type="text/css" media="screen, projection">
+    {
+        {
+        css.contents
+      }
+    }
+  </style>
+  {% else %}
+  <link rel="stylesheet" href="{{ css.path_url }}">
+  {% endif %}
+  {% endfor %}
+  <!-- /Styles -->
+  <!-- Javascripts -->
+  {% if embed %}
+  <script>
+    { { js.contents } }
+  </script>
+  {% else %}
+  <script type="text/javascript" src="{{ js.path_url }}"></script>
+  {% endif %}
+  {% for js in user_js %}
+  {% if embed %}
+  <script>
+    { { js.contents } }
+  </script>
+  {% else %}
+  <script type="text/javascript" src="{{ js.path_url }}"></script>
+  {% endif %}
+  {% endfor %}
+  {% if math_output %}
+  <script type="text/x-mathjax-config">
         MathJax.Hub.Config({
           tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] },
           skipTags: ["script","noscript","style","textarea","pre","code"]
         });
       </script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    {% endif %}
-    <!-- /Javascripts -->
+  <script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  {% endif %}
+  <!-- /Javascripts -->
 </head>
+
 <body>
   <div id="blank"></div>
-  <div class="presentation highlight">
-    <div id="time">
-      <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
-    </div>            
+  <div class="presentation">
     <div id="current_presenter_notes">
       <div id="presenter_note"></div>
     </div>
@@ -89,7 +101,8 @@
       {% for slide in slides %}
       <!-- slide source: {% if slide.source %}{{ slide.source.rel_path }}{% endif %} -->
       <div class="slide-wrapper">
-        <div class="slide{% if slide.classes %}{% for class in slide.classes %} {{ class }}{% endfor %}{% endif %}">
+        <div
+          class="slide{% if slide.classes %}{% for class in slide.classes %} {{ class }}{% endfor %}{% endif %} slide-{{slide.number}}">
           <div class="inner">
             {% if slide.header %}
             <header>{{ slide.header }}</header>
@@ -99,11 +112,13 @@
             {% endif %}
           </div>
           <div class="presenter_notes">
-            <header><h1>Notes</h1></header>
+            <header>
+              <h1>Presenter Notes</h1>
+            </header>
             <section>
-            {% if slide.presenter_notes %}
+              {% if slide.presenter_notes %}
               {{ slide.presenter_notes }}
-            {% endif %}
+              {% endif %}
             </section>
           </div>
           <footer>
@@ -121,7 +136,6 @@
       {% endfor %}
     </div>
   </div>
-  
   {% if toc %}
   <div id="toc" class="sidebar hidden">
     <h2>Table of Contents</h2>
@@ -133,12 +147,12 @@
         <td><a href="#slide{{ section.number }}">{{ section.number }}</a></td>
       </tr>
       {% if section.sub %}
-        {% for subsection in section.sub %}
-        <tr id="toc-row-{{ subsection.number }}" class="sub">
-          <th><a href="#slide{{ subsection.number }}">{{ subsection.title }}</a></th>
-          <td><a href="#slide{{ subsection.number }}">{{ subsection.number }}</a></td>
-        </tr>
-        {% endfor %}
+      {% for subsection in section.sub %}
+      <tr id="toc-row-{{ subsection.number }}" class="sub">
+        <th><a href="#slide{{ subsection.number }}">{{ subsection.title }}</a></th>
+        <td><a href="#slide{{ subsection.number }}">{{ subsection.number }}</a></td>
+      </tr>
+      {% endfor %}
       {% endif %}
       {% endfor %}
     </table>
@@ -149,7 +163,7 @@
     <table>
       <caption>Help</caption>
       <tr>
-        <th>Table of contents</th>
+        <th>Table of Contents</th>
         <td>t</td>
       </tr>
       <tr>
@@ -157,28 +171,28 @@
         <td>ESC</td>
       </tr>
       <tr>
-        <th>Autoscale</th>
+        <th>Full screen slides</th>
         <td>e</td>
       </tr>
       <tr>
-        <th>Full screen slides</th>
-        <td>f</td>
-      </tr>
-      <tr>
-        <th>Presenter view</th>
+        <th>Presenter View</th>
         <td>p</td>
       </tr>
       <tr>
-        <th>Source files</th>
+        <th>Source Files</th>
         <td>s</td>
       </tr>
       <tr>
-        <th>Slide numbers</th>
+        <th>Slide Numbers</th>
         <td>n</td>
       </tr>
       <tr>
-        <th>Blank screen</th>
+        <th>Toggle screen blanking</th>
         <td>b</td>
+      </tr>
+      <tr>
+        <th>Show/hide slide context</th>
+        <td>c</td>
       </tr>
       <tr>
         <th>Notes</th>
@@ -190,6 +204,7 @@
       </tr>
     </table>
   </div>
-  <script>main();</script>
+  <script>main()</script>
 </body>
+
 </html>
