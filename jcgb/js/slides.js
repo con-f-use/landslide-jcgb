@@ -11,8 +11,7 @@ function main() {
     var blanked = false;
     var slides = document.getElementsByClassName('slide');
     var touchStartX = 0;
-    var spaces = /\s+/;
-    var a1 = [''];
+    var spaces = /\s+/, a1 = [''];
     var tocOpened = false;
     var helpOpened = false;
     var overviewActive = false;
@@ -22,7 +21,55 @@ function main() {
     var presenterViewWin = null;
     var isPresenterView = false;
 
-    var getSlideEl = function(slideNo) {
+    var str2array = function (s) {
+        if (typeof s == 'string' || s instanceof String) {
+            if (s.indexOf(' ') < 0) {
+                a1[0] = s;
+                return a1;
+            } else {
+                return s.split(spaces);
+            }
+        }
+        return s;
+    };
+
+    var trim = function (str) {
+        return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    };
+
+    var addClass = function (node, classStr) {
+        classStr = str2array(classStr);
+        var cls = ' ' + node.className + ' ';
+        for (var i = 0, len = classStr.length, c; i < len; ++i) {
+            c = classStr[i];
+            if (c && cls.indexOf(' ' + c + ' ') < 0) {
+                cls += c + ' ';
+            }
+        }
+        node.className = trim(cls);
+    };
+
+    var removeClass = function (node, classStr) {
+        var cls;
+        if (!node) {
+            throw 'no node provided';
+        }
+        if (classStr !== undefined) {
+            classStr = str2array(classStr);
+            cls = ' ' + node.className + ' ';
+            for (var i = 0, len = classStr.length; i < len; ++i) {
+                cls = cls.replace(' ' + classStr[i] + ' ', ' ');
+            }
+            cls = trim(cls);
+        } else {
+            cls = '';
+        }
+        if (node.className != cls) {
+            node.className = cls;
+        }
+    };
+
+    var getSlideEl = function (slideNo) {
         if (slideNo > 0) {
             return slides[slideNo - 1];
         } else {
@@ -30,7 +77,7 @@ function main() {
         }
     };
 
-    var getSlideTitle = function(slideNo) {
+    var getSlideTitle = function (slideNo) {
         var el = getSlideEl(slideNo);
         if (el) {
             var headers = el.getElementsByTagName('header');
@@ -41,7 +88,7 @@ function main() {
         return null;
     };
 
-    var getSlidePresenterNote = function(slideNo) {
+    var getSlidePresenterNote = function (slideNo) {
         var el = getSlideEl(slideNo);
         if (el) {
             var n = el.getElementsByClassName('presenter_notes');
@@ -52,18 +99,18 @@ function main() {
         return null;
     };
 
-    var changeSlideElClass = function(slideNo, className) {
+    var changeSlideElClass = function (slideNo, className) {
         var el = getSlideEl(slideNo);
         if (el) {
-            el.classList.remove('far-past', 'past', 'current', 'future', 'far-future');
-            el.classList.add(className);
+            removeClass(el, 'far-past past current future far-future');
+            addClass(el, className);
         }
     };
 
-    var updateSlideClasses = function(updateOther) {
+    var updateSlideClasses = function (updateOther) {
         window.location.hash = (isPresenterView ? "presenter" : "slide") + currentSlideNo;
 
-        for (var i=1; i<currentSlideNo-1; i++) {
+        for (var i = 1; i < currentSlideNo - 1; i++) {
             changeSlideElClass(i, 'far-past');
         }
 
@@ -71,7 +118,7 @@ function main() {
         changeSlideElClass(currentSlideNo, 'current');
         changeSlideElClass(currentSlideNo + 1, 'future');
 
-        for (i=currentSlideNo+2; i<slides.length+1; i++) {
+        for (i = currentSlideNo + 2; i < slides.length + 1; i++) {
             changeSlideElClass(i, 'far-future');
         }
 
@@ -86,7 +133,7 @@ function main() {
         if (updateOther) { updateOtherPage(); }
     };
 
-    var updatePresenterNotes = function() {
+    var updatePresenterNotes = function () {
         if (!isPresenterView) { return; }
 
         var existingNote = document.getElementById('current_presenter_notes');
@@ -96,52 +143,52 @@ function main() {
         existingNote.replaceChild(currentNote, document.getElementById('presenter_note'));
     };
 
-    var highlightCurrentTocLink = function() {
+    var highlightCurrentTocLink = function () {
         var toc = document.getElementById('toc');
 
         if (toc) {
             var tocRows = toc.getElementsByTagName('tr');
-            for (var i=0; i<tocRows.length; i++) {
-                tocRows.item(i).classList.remove('active');
+            for (var i = 0; i < tocRows.length; i++) {
+                removeClass(tocRows.item(i), 'active');
             }
 
             var currentTocRow = document.getElementById('toc-row-' + currentSlideNo);
             if (currentTocRow) {
-                currentTocRow.classList.add('active');
+                addClass(currentTocRow, 'active');
             }
         }
     };
 
-    var updateOtherPage = function() {
+    var updateOtherPage = function () {
         if (!showingPresenterView) { return; }
 
         var w = isPresenterView ? window.opener : presenterViewWin;
         w.postMessage('slide#' + currentSlideNo, '*');
     };
 
-    var nextSlide = function() {
+    var nextSlide = function () {
         if (currentSlideNo < slides.length) {
             currentSlideNo++;
         }
         updateSlideClasses(true);
     };
 
-    var prevSlide = function() {
+    var prevSlide = function () {
         if (currentSlideNo > 1) {
             currentSlideNo--;
         }
         updateSlideClasses(true);
     };
 
-    var showNotes = function() {
+    var showNotes = function () {
         var notes = getSlideEl(currentSlideNo).getElementsByClassName('notes');
         for (var i = 0, len = notes.length; i < len; i++) {
-            notes.item(i).style.display = (notesOn) ? 'none':'block';
+            notes.item(i).style.display = (notesOn) ? 'none' : 'block';
         }
         notesOn = !notesOn;
     };
 
-    var showSlideNumbers = function() {
+    var showSlideNumbers = function () {
         var asides = document.getElementsByClassName('page_number');
         var hidden = asides[0].style.display != 'block';
         for (var i = 0; i < asides.length; i++) {
@@ -149,7 +196,7 @@ function main() {
         }
     };
 
-    var showSlideSources = function() {
+    var showSlideSources = function () {
         var asides = document.getElementsByClassName('source');
         var hidden = asides[0].style.display != 'block';
         for (var i = 0; i < asides.length; i++) {
@@ -157,9 +204,9 @@ function main() {
         }
     };
 
-    var showToc = function() {
+    var showToc = function () {
         if (helpOpened) {
-                showHelp();
+            showHelp();
         }
         var toc = document.getElementById('toc');
         if (toc) {
@@ -169,9 +216,9 @@ function main() {
         updateOverview();
     };
 
-    var showHelp = function() {
+    var showHelp = function () {
         if (tocOpened) {
-                showToc();
+            showToc();
         }
 
         var help = document.getElementById('help');
@@ -182,7 +229,7 @@ function main() {
         }
     };
 
-    var showPresenterView = function() {
+    var showPresenterView = function () {
         if (isPresenterView) { return; }
 
         if (showingPresenterView) {
@@ -191,46 +238,28 @@ function main() {
             showingPresenterView = false;
         } else {
             presenterViewWin = open(window.location.pathname + "#presenter" + currentSlideNo, 'presenter_notes',
-                                                                    'directories=no,location=no,toolbar=no,menubar=no,copyhistory=no');
+                'directories=no,location=no,toolbar=no,menubar=no,copyhistory=no');
             showingPresenterView = true;
         }
     };
 
-    var setPerspective = function () {
-        document.getElementsByClassName('presentation')[0].style.webkitPerspective = '0';
-    };
-
-    var switch3D = function() {
+    var switch3D = function () {
         if (document.body.className.indexOf('three-d') == -1) {
             document.getElementsByClassName('presentation')[0].style.webkitPerspective = '1000px';
             document.body.className += ' three-d';
         } else {
-            window.setTimeout(setPerspective, 2000);
+            window.setTimeout('document.getElementsByClassName(\'presentation\')[0].style.webkitPerspective = \'0\';', 2000);
             document.body.className = document.body.className.replace(/three-d/, '');
         }
     };
 
-    var toggleFullScreen = function() {
-        if (document.mozFullScreen !== undefined && !document.mozFullScreen) {
-            document.body.mozRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-        } else if (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen) {
-            document.body.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-        } else {
-            if (document.webkitCancelFullScreen !== undefined) {
-                document.webkitCancelFullScreen();
-            } else if (document.mozCancelFullScreen !== undefined) {
-                document.mozCancelFullScreen();
-            }
-        }
-    };
-
-    var toggleOverview = function() {
+    var toggleOverview = function () {
         if (!overviewActive) {
-            document.body.classList.add('expose');
+            addClass(document.body, 'expose');
             overviewActive = true;
             setScale(1);
         } else {
-            document.body.classList.remove('expose');
+            removeClass(document.body, 'expose');
             overviewActive = false;
             if (expanded) {
                 setScale(scale);    // restore scale
@@ -240,20 +269,16 @@ function main() {
         updateOverview();
     };
 
-    var updateOverview = function() {
-        var presentation;
+    var updateOverview = function () {
         try {
-            presentation = document.getElementsByClassName('presentation')[0];
+            var presentation = document.getElementsByClassName('presentation')[0];
         } catch (e) {
             return;
         }
 
         if (isPresenterView) {
-            if (overviewActive) {
-                document.body.classList.add('presenter_view');
-            } else {
-                document.body.classList.remove('presenter_view');
-            }
+            var action = overviewActive ? removeClass : addClass;
+            action(document.body, 'presenter_view');
         }
 
         var toc = document.getElementById('toc');
@@ -263,20 +288,22 @@ function main() {
         }
 
         if (!tocOpened || !overviewActive) {
-            presentation.style.marginLeft = '-512px';
+            presentation.style.marginLeft = '0px';
+            presentation.style.width = '100%';
         } else {
-            presentation.style.marginLeft = (toc.clientWidth - 512) + 'px';
+            presentation.style.marginLeft = toc.clientWidth + 'px';
+            presentation.style.width = (presentation.clientWidth - toc.clientWidth) + 'px';
         }
     };
 
-    var computeScale = function() {
+    var computeScale = function () {
         var cSlide = document.getElementsByClassName('current')[0];
         var sx = cSlide.clientWidth / window.innerWidth;
         var sy = cSlide.clientHeight / window.innerHeight;
         return 1 / Math.max(sx, sy);
     };
 
-    var setScale = function(scale) {
+    var setScale = function (scale) {
         var presentation = document.getElementsByClassName('slides')[0];
         var transform = 'scale(' + scale + ')';
         presentation.style.MozTransform = transform;
@@ -286,38 +313,35 @@ function main() {
         presentation.style.transform = transform;
     };
 
-    var resizeSlides = function() {
-        if (!expanded) {
-            setScale(1);
-        } else {
-            scale = computeScale();
-            setScale(scale);
-        }
-    };
-
-    var expandSlides = function() {
+    var expandSlides = function () {
         if (overviewActive) {
             return;
         }
-        expanded = !expanded;
-        resizeSlides();
+        if (expanded) {
+            setScale(1);
+            expanded = false;
+        } else {
+            scale = computeScale();
+            setScale(scale);
+            expanded = true;
+        }
     };
 
-    var showContext = function() {
+    var showContext = function () {
         try {
             var presentation = document.getElementsByClassName('slides')[0];
-            presentation.classList.remove('nocontext');
-        } catch (e) {}
+            removeClass(presentation, 'nocontext');
+        } catch (e) { }
     };
 
-    var hideContext = function() {
+    var hideContext = function () {
         try {
             var presentation = document.getElementsByClassName('slides')[0];
-            presentation.classList.add('nocontext');
-        } catch (e) {}
+            addClass(presentation, 'nocontext');
+        } catch (e) { }
     };
 
-    var processContext = function() {
+    var processContext = function () {
         if (hiddenContext) {
             hideContext();
         } else {
@@ -325,12 +349,12 @@ function main() {
         }
     };
 
-    var toggleContext = function() {
+    var toggleContext = function () {
         hiddenContext = !hiddenContext;
         processContext();
     };
 
-    var toggleBlank = function() {
+    var toggleBlank = function () {
         blank_elem = document.getElementById('blank');
 
         blank_elem.style.display = blanked ? 'none' : 'block';
@@ -338,31 +362,33 @@ function main() {
         blanked = !blanked;
     };
 
-    var isModifierKey = function(keyCode) {
+    var isModifierKey = function (keyCode) {
         switch (keyCode) {
             case 16: // shift
             case 17: // ctrl
             case 18: // alt
             case 91: // command
                 return true;
+                break;
             default:
                 return false;
+                break;
         }
     };
 
-    var checkModifierKeyUp = function(event) {
+    var checkModifierKeyUp = function (event) {
         if (isModifierKey(event.keyCode)) {
             modifierKeyDown = false;
         }
     };
 
-    var checkModifierKeyDown = function(event) {
+    var checkModifierKeyDown = function (event) {
         if (isModifierKey(event.keyCode)) {
             modifierKeyDown = true;
         }
     };
 
-    var handleBodyKeyDown = function(event) {
+    var handleBodyKeyDown = function (event) {
         switch (event.keyCode) {
             case 13: // Enter
                 if (overviewActive) {
@@ -385,7 +411,7 @@ function main() {
                 break;
             case 50: // 2
                 if (!modifierKeyDown) {
-                        showNotes();
+                    showNotes();
                 }
                 break;
             case 51: // 3
@@ -408,15 +434,6 @@ function main() {
             case 69: // e
                 if (!modifierKeyDown && !overviewActive) {
                     expandSlides();
-                }
-                break;
-            case 70: // f
-                // From http://io-2012-slides.googlecode.com/
-                // Only respect 'f' on body. Don't want to capture keys from an <input>.
-                // Also, ignore browser's fullscreen shortcut (cmd+shift+f) so we don't
-                // get trapped in fullscreen!
-                if (event.target == document.body && !modifierKeyDown) {
-                    toggleFullScreen();
                 }
                 break;
             case 72: // h
@@ -443,7 +460,7 @@ function main() {
         }
     };
 
-    var handleWheel = function(event) {
+    var handleWheel = function (event) {
         if (tocOpened || helpOpened || overviewActive) {
             return;
         }
@@ -455,105 +472,77 @@ function main() {
         }
 
         if (event.wheelDelta) {
-            delta = event.wheelDelta/120;
+            delta = event.wheelDelta / 120;
             if (window.opera) delta = -delta;
         } else if (event.detail) {
-            delta = -event.detail/3;
+            delta = -event.detail / 3;
         }
 
-        if (delta && delta <0) {
+        if (delta && delta < 0) {
             nextSlide();
         } else if (delta) {
             prevSlide();
         }
     };
 
-    var onSlideClick = function (e) {
-        if (overviewActive) {
-            currentSlideNo = this.num;
-            toggleOverview();
-            updateSlideClasses(true);
-            e.preventDefault();
-        }
-        return false;
-    };
-
-    var addSlideClickListeners = function() {
-        for (var i=0; i < slides.length; i++) {
+    var addSlideClickListeners = function () {
+        for (var i = 0; i < slides.length; i++) {
             var slide = slides.item(i);
             slide.num = i + 1;
-            slide.addEventListener('click', onSlideClick, true);
+            slide.addEventListener('click', function (e) {
+                if (overviewActive) {
+                    currentSlideNo = this.num;
+                    toggleOverview();
+                    updateSlideClasses(true);
+                    e.preventDefault();
+                }
+                return false;
+            }, true);
         }
     };
 
-    var addRemoteWindowControls = function() {
-        window.addEventListener("message", function(e) {
+    var addRemoteWindowControls = function () {
+        window.addEventListener("message", function (e) {
             if (e.data.indexOf("slide#") != -1) {
-                    currentSlideNo = Number(e.data.replace('slide#', ''));
-                    updateSlideClasses(false);
+                currentSlideNo = Number(e.data.replace('slide#', ''));
+                updateSlideClasses(false);
             }
         }, false);
     };
 
-    var addTouchListeners = function() {
-        document.addEventListener('touchstart', function(e) {
+    var addTouchListeners = function () {
+        document.addEventListener('touchstart', function (e) {
             touchStartX = e.touches[0].pageX;
         }, false);
-        document.addEventListener('touchend', function(e) {
+        document.addEventListener('touchend', function (e) {
             var pixelsMoved = touchStartX - e.changedTouches[0].pageX;
             var SWIPE_SIZE = 150;
             if (pixelsMoved > SWIPE_SIZE) {
                 nextSlide();
             }
             else if (pixelsMoved < -SWIPE_SIZE) {
-             prevSlide();
+                prevSlide();
             }
         }, false);
     };
 
-    var onTocClick = function (e) {
-        currentSlideNo = Number(this.attributes.href.value.replace('#slide', ''));
-        updateSlideClasses(true);
-        e.preventDefault();
-    };
-
-    var addTocLinksListeners = function() {
+    var addTocLinksListeners = function () {
         var toc = document.getElementById('toc');
         if (toc) {
             var tocLinks = toc.getElementsByTagName('a');
-            for (var i=0; i < tocLinks.length; i++) {
-                tocLinks.item(i).addEventListener('click', onTocClick, true);
+            for (var i = 0; i < tocLinks.length; i++) {
+                tocLinks.item(i).addEventListener('click', function (e) {
+                    currentSlideNo = Number(this.attributes['href'].value.replace('#slide', ''));
+                    updateSlideClasses(true);
+                    e.preventDefault();
+                }, true);
             }
         }
     };
 
-    var updateTimeElement = function (id, value, pad) {
-        var elem = document.getElementById(id),
-            paddedValue;
-
-        while (elem.firstChild) {
-            elem.removeChild(elem.firstChild);
-        }
-
-        if (pad) {
-            paddedValue = ("0" + value.toString()).slice(-2);
-        } else {
-            paddedValue = value.toString();
-        }
-        elem.appendChild(document.createTextNode(paddedValue));
-    };
-
-    var updateTime = function () {
-        var date = new Date();
-
-        updateTimeElement("hours", date.getHours(), false);
-        updateTimeElement("minutes", date.getMinutes(), true);
-        updateTimeElement("seconds", date.getSeconds(), true);
-    };
-
     // initialize
 
-    (function() {
+    (function () {
         if (window.location.hash == "") {
             currentSlideNo = 1;
         } else if (window.location.hash.indexOf("#presenter") != -1) {
@@ -561,9 +550,7 @@ function main() {
             isPresenterView = true;
             showingPresenterView = true;
             presenterViewWin = window;
-            document.body.classList.add('presenter_view');
-            updateTime();
-            window.setInterval(updateTime, 1000);
+            addClass(document.body, 'presenter_view');
         } else {
             currentSlideNo = Number(window.location.hash.replace('#slide', ''));
         }
@@ -573,11 +560,11 @@ function main() {
         document.addEventListener('keydown', checkModifierKeyDown, false);
         document.addEventListener('DOMMouseScroll', handleWheel, false);
 
-        window.onmousewheel = document.onmousewheel = handleWheel;
-        window.onresize = resizeSlides;
+        document.onmousewheel = handleWheel;
+        window.onresize = expandSlides;
 
-        for (var i = 0; i < slides.length; i++) {
-            slides[i].classList.add('slide', 'far-future');
+        for (var i = 0, el; el = slides[i]; i++) {
+            addClass(el, 'slide far-future');
         }
         updateSlideClasses(false);
 
